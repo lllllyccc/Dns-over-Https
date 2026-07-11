@@ -1,0 +1,16 @@
+# Binary
+doh-server
+doh-server.exe
+
+# Data
+data/
+certs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

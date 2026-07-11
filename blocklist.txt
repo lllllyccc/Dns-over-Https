@@ -1,0 +1,19 @@
+# Ad and Tracker Blocklist
+# Format: 0.0.0.0 domain.com
+
+# Common ad networks
+0.0.0.0 ad.doubleclick.net
+0.0.0.0 pagead2.googlesyndication.com
+0.0.0.0 adservice.google.com
+0.0.0.0 googleads.g.doubleclick.net
+0.0.0.0 www.googleadservices.com
+
+# Tracking
+0.0.0.0 analytics.google.com
+0.0.0.0 stats.g.doubleclick.net
+0.0.0.0 tracking.example.com
+
+# Social trackers
+0.0.0.0 pixel.facebook.com
+0.0.0.0 connect.facebook.net
+0.0.0.0 analytics.twitter.com
