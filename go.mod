@@ -1,6 +1,6 @@
 module dns-over-https
 
-go 1.26
+go 1.22
 
 require (
 	github.com/miekg/dns v1.1.58
