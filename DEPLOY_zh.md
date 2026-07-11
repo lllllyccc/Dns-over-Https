@@ -1,5 +1,7 @@
 # 部署指南
 
+**注意：本文为DEPLOY.md的简体中文版本，由mimo-v2.5-pro翻译，仅供参考。**
+
 ## 前置条件
 
 - Ubuntu 22.04+ 服务器（Oracle Cloud ARM/x86 均可）
