@@ -1,0 +1,14 @@
+[Unit]
+Description=DNS-over-HTTPS Server
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/doh-server
+ExecStart=/opt/doh-server/doh-server /opt/doh-server/config.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

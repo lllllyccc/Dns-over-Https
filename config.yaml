@@ -1,0 +1,35 @@
+listen: "127.0.0.1:8053"
+admin_listen: "127.0.0.1:8054"
+domain: "doh.yourdomain.com"
+
+upstreams:
+  - name: "google"
+    address: "8.8.8.8:53"
+    protocol: "udp"
+    weight: 1
+  - name: "cloudflare"
+    address: "1.1.1.1:53"
+    protocol: "udp"
+    weight: 1
+  - name: "cloudflare-doh"
+    address: "https://cloudflare-dns.com/dns-query"
+    protocol: "doh"
+    weight: 0
+
+cache:
+  enabled: true
+  max_entries: 10000
+  default_ttl: 3600
+
+filter:
+  enabled: true
+  blocklist_path: "./blocklist.txt"
+
+tls:
+  email: ""
+  cache_dir: "./certs"
+
+logging:
+  level: "info"
+  query_log: true
+  max_log_entries: 10000
