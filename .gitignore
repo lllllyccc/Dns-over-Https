@@ -2,6 +2,9 @@
 doh-server
 doh-server.exe
 
+# Config (contains secrets)
+config.yaml
+
 # Data
 data/
 certs/
