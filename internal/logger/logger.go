@@ -1,7 +1,8 @@
 package logger
 
 import (
-	"log/slog"
+	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -41,25 +42,10 @@ type stats struct {
 type Logger struct {
 	queryLog *QueryLog
 	stats    *stats
-	logger   *slog.Logger
+	logger   *log.Logger
 }
 
 func New(maxLogEntries int, level string) *Logger {
-	var lvl slog.Level
-	switch level {
-	case "debug":
-		lvl = slog.LevelDebug
-	case "warn":
-		lvl = slog.LevelWarn
-	case "error":
-		lvl = slog.LevelError
-	default:
-		lvl = slog.LevelInfo
-	}
-
-	handler := slog.NewJSONHandler(nil, &slog.HandlerOptions{Level: lvl})
-	logger := slog.New(handler)
-
 	return &Logger{
 		queryLog: &QueryLog{
 			entries: make([]QueryEntry, 0),
@@ -72,20 +58,19 @@ func New(maxLogEntries int, level string) *Logger {
 				UpstreamStats: make(map[string]int64),
 			},
 		},
-		logger: logger,
+		logger: log.New(os.Stdout, "[DoH] ", log.LstdFlags),
 	}
 }
 
 func (l *Logger) LogQuery(entry QueryEntry) {
-	l.logger.Info("dns_query",
-		"client_ip", entry.ClientIP,
-		"query_name", entry.QueryName,
-		"query_type", entry.QueryType,
-		"upstream", entry.Upstream,
-		"cache_hit", entry.CacheHit,
-		"blocked", entry.Blocked,
-		"rtt_ms", entry.RTT,
-	)
+	src := entry.Upstream
+	if entry.CacheHit {
+		src = "cache"
+	}
+	if entry.Blocked {
+		src = "blocked"
+	}
+	l.logger.Printf("query=%s type=%s client=%s upstream=%s rtt=%dms", entry.QueryName, entry.QueryType, entry.ClientIP, src, entry.RTT)
 
 	l.queryLog.mu.Lock()
 	l.queryLog.entries = append(l.queryLog.entries, entry)
@@ -108,7 +93,7 @@ func (l *Logger) LogQuery(entry QueryEntry) {
 }
 
 func (l *Logger) LogError(msg string, args ...any) {
-	l.logger.Error(msg, args...)
+	l.logger.Printf("ERROR %s %v", msg, args)
 	l.stats.mu.Lock()
 	l.stats.Errors++
 	l.stats.mu.Unlock()
