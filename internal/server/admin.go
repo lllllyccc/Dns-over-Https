@@ -73,6 +73,8 @@ func (h *AdminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.serveFilterToggle(w, r)
 	case path == "/admin/api/cache/purge" && r.Method == "POST":
 		h.serveCachePurge(w, r)
+	case path == "/admin/api/system":
+		h.serveSystem(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -120,6 +122,7 @@ var dashboardTmpl = template.Must(template.New("dashboard").Parse(`<!DOCTYPE htm
         <div class="card"><h2>Cache Hit Rate</h2><div class="stat" id="cache-rate">-</div><div class="stat-label">Cached responses</div></div>
         <div class="card"><h2>Blocked</h2><div class="stat" id="blocked">-</div><div class="stat-label">Filtered queries</div></div>
         <div class="card"><h2>Upstreams</h2><div id="upstream-list"></div></div>
+        <div class="card"><h2>Server Status</h2><div id="system-info" style="font-size:13px"></div></div>
         <div class="card"><h2>Filter ({{.FilterCount}} domains)</h2>
             <div style="margin-bottom:10px">
                 <input class="input" id="new-domain" placeholder="domain.com">
@@ -170,6 +173,18 @@ var dashboardTmpl = template.Must(template.New("dashboard").Parse(`<!DOCTYPE htm
                 ' <button class="btn btn-primary" onclick="toggleFilter()" style="padding:4px 8px;font-size:11px">Toggle</button>';
 
             document.getElementById('cache-stats').innerHTML = '<div style="font-size:13px;margin:5px 0">Entries: ' + (stats.cache_total || 0) + '</div>';
+
+            const sys = await (await fetch('/admin/api/system')).json();
+            document.getElementById('system-info').innerHTML =
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+                '<div><span style="color:#64748b">Uptime:</span> ' + sys.uptime + '</div>' +
+                '<div><span style="color:#64748b">CPU:</span> ' + sys.cpu_usage + '%</div>' +
+                '<div><span style="color:#64748b">Memory:</span> ' + sys.mem_used + ' / ' + sys.mem_total + '</div>' +
+                '<div><span style="color:#64748b">Mem Usage:</span> ' + sys.mem_usage + '%</div>' +
+                '<div><span style="color:#64748b">Disk:</span> ' + sys.disk_used + ' / ' + sys.disk_total + '</div>' +
+                '<div><span style="color:#64748b">Disk Usage:</span> ' + sys.disk_usage + '%</div>' +
+                '<div style="grid-column:1/-1"><span style="color:#64748b">Load:</span> ' + sys.load_1 + ' / ' + sys.load_5 + ' / ' + sys.load_15 + '</div>' +
+                '</div>';
         }
         async function addDomain() {
             const d = document.getElementById('new-domain').value.trim();
@@ -315,4 +330,9 @@ func (h *AdminHandler) serveCachePurge(w http.ResponseWriter, r *http.Request) {
 	h.cache.Purge()
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+func (h *AdminHandler) serveSystem(w http.ResponseWriter, r *http.Request) {
+	sys := getSystemInfo()
+	json.NewEncoder(w).Encode(sys)
 }
