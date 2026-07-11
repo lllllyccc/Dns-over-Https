@@ -3,7 +3,7 @@
 
 set -e
 
-DOMAIN="doh.yourdomain.com"
+DOMAIN="doh.lllllyccc.qzz.io"
 INSTALL_DIR="/opt/doh-server"
 
 echo "=== DNS-over-HTTPS Deployment ==="

@@ -1,6 +1,6 @@
 listen: "127.0.0.1:8053"
 admin_listen: "127.0.0.1:8054"
-domain: "doh.yourdomain.com"
+domain: "doh.lllllyccc.qzz.io"
 
 upstreams:
   - name: "google"
