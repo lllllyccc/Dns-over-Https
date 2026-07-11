@@ -5,13 +5,6 @@
 	<key>PayloadContent</key>
 	<array>
 		<dict>
-			<key>DNSOverHTTPS</key>
-			<dict>
-				<key>Enabled</key>
-				<true/>
-				<key>ServerAddress</key>
-				<string>https://doh.lllllyccc.qzz.io/dns-query</string>
-			</dict>
 			<key>PayloadDescription</key>
 			<string>Configures DNS settings for DNS over HTTPS</string>
 			<key>PayloadDisplayName</key>
@@ -24,14 +17,19 @@
 			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
-			<key>ProhibitFallbackData</key>
-			<false/>
-			<key>ServerName</key>
-			<string>doh.lllllyccc.qzz.io</string>
-			<key>SupplementalMatchDomains</key>
-			<array>
-				<string></string>
-			</array>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerURL</key>
+				<string>https://doh.lllllyccc.qzz.io/dns-query</string>
+				<key>ServerName</key>
+				<string>doh.lllllyccc.qzz.io</string>
+				<key>SupplementalMatchDomains</key>
+				<array>
+					<string></string>
+				</array>
+			</dict>
 		</dict>
 	</array>
 	<key>PayloadDescription</key>
