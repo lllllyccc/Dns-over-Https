@@ -1,39 +1,62 @@
 # DNS-over-HTTPS Server
 
-A full-featured DoH forwarder written in Go. Forwards DNS queries to upstream providers (Google, Cloudflare) with caching, ad/tracker blocking, and an admin dashboard.
+A lightweight, high-performance DNS-over-HTTPS (DoH) forwarder built with Go. Proxy your DNS queries through HTTPS to enhance privacy and bypass DNS-based restrictions.
+
+[![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+## Why?
+
+Traditional DNS queries are sent in plaintext, making them vulnerable to eavesdropping and manipulation. This DoH server:
+
+- **Encrypts** your DNS queries via HTTPS (RFC 8484)
+- **Forwards** to trusted upstream resolvers (Google, Cloudflare)
+- **Caches** responses locally to reduce latency
+- **Blocks** ads and trackers at the DNS level
 
 ## Features
 
-- **RFC 8484 compliant** DoH server (GET + POST)
-- **Multiple upstreams**: Google DNS, Cloudflare DNS, with failover
-- **DNS caching**: BoltDB-backed persistent cache with TTL
-- **Ad/tracker blocking**: Hosts-file based filtering
-- **Admin dashboard**: Real-time stats, query log, filter management
-- **Structured logging**: JSON logs with query details
-- **Let's Encrypt TLS**: Automatic certificate provisioning
+| Feature | Description |
+|---------|-------------|
+| RFC 8484 Compliant | Full DoH support with GET and POST methods |
+| Multi-Upstream | Google DNS, Cloudflare DNS with automatic failover |
+| Persistent Cache | BoltDB-backed cache with TTL-aware eviction |
+| Ad/Tracker Blocking | Hosts-file based filtering with runtime management |
+| Admin Dashboard | Web UI for stats, logs, filter & cache management |
+| Apple Profiles | `.mobileconfig` for iOS/macOS one-click setup |
+| Systemd Service | Auto-start, auto-restart, zero-downtime updates |
 
 ## Quick Start
 
 ```bash
-# Copy and edit config
+# Clone
+git clone https://github.com/lllllyccc/Dns-over-Https.git
+cd Dns-over-Https
+
+# Configure
 cp config.example.yaml config.yaml
-vim config.yaml
+# Edit config.yaml with your settings
 
-# Build
+# Build & Run
 go build -o doh-server ./cmd/doh-server
+./doh-server config.yaml
+```
 
-# Run
-./do-server config.yaml
+## Architecture
+
+```
+Client (DoH) ──► Nginx (443/TLS) ──► Go Server (8053) ──► Google DNS
+                                          │               Cloudflare DNS
+                                          ▼
+                                     Cache (BoltDB)
 ```
 
 ## Configuration
 
-Edit `config.yaml`:
-
 ```yaml
-listen: "0.0.0.0:443"
-admin_listen: "127.0.0.1:8443"
-domain: "dns.yourdomain.com"
+listen: "127.0.0.1:8053"
+admin_listen: "127.0.0.1:8054"
+domain: "doh.yourdomain.com"
 
 upstreams:
   - name: "google"
@@ -44,81 +67,84 @@ upstreams:
     address: "1.1.1.1:53"
     protocol: "udp"
     weight: 1
+
+cache:
+  enabled: true
+  max_entries: 10000
+  default_ttl: 3600
+
+filter:
+  enabled: true
+  blocklist_path: "./blocklist.txt"
+
+admin:
+  username: "admin"
+  password: "changeme"
 ```
 
-## Usage
+See [DEPLOY.md](DEPLOY.md) for full deployment guide.
 
-### DoH Client
+## Admin Dashboard
 
-```bash
-# GET request
-curl -H "accept: application/dns-message" \
-  "https://dns.yourdomain.com/dns-query?dns=AAABAAABAAAAAAAAB2V4YW1wbGUDAQEA"
+The built-in web dashboard provides:
 
-# With dig (if supported)
-dig @dns.yourdomain.com -p 443 example.com
+- **Real-time stats**: query count, cache hit rate, blocked queries
+- **Server status**: CPU, memory, disk usage, uptime, load average
+- **Upstream health**: live monitoring of DNS resolver status
+- **Query log**: last 50 queries with source, type, and latency
+- **Filter management**: add/remove domains, toggle blocking on/off
+- **Cache control**: view entries, purge cache
+
+```
+https://doh.yourdomain.com/admin/
 ```
 
-### Admin Dashboard
+## Apple Devices
 
-Open `https://127.0.0.1:8443` in browser (local access only).
+One-click DNS configuration for iOS, iPadOS, and macOS:
 
-## Oracle Free Tier Deployment
+1. Open `https://doh.yourdomain.com/doh.mobileconfig` in Safari
+2. Allow the profile download
+3. Go to Settings → General → VPN & Device Management
+4. Install the profile
 
-1. Provision Ubuntu 22.04 ARM instance
-2. Install Go:
-   ```bash
-   wget https://go.dev/dl/go1.22.0.linux-arm64.tar.gz
-   sudo tar -C /usr/local -xzf go1.22.0.linux-arm64.tar.gz
-   export PATH=$PATH:/usr/local/go/bin
-   ```
-3. Build for ARM:
-   ```bash
-   GOOS=linux GOARCH=arm64 go build -o doh-server ./cmd/doh-server
-   ```
-4. Configure DNS: Point `dns.yourdomain.com` → server IP
-5. Run with systemd (see below)
+All DNS queries will automatically route through your DoH server.
 
-### Systemd Service
-
-```ini
-[Unit]
-Description=DNS-over-HTTPS Server
-After=network.target
-
-[Service]
-Type=simple
-User=doh
-WorkingDirectory=/opt/doh-server
-ExecStart=/opt/doh-server/doh-server /opt/doh-server/config.yaml
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-## Docker
-
-```bash
-docker build -t doh-server .
-docker run -p 443:443 -p 8443:8443 -v ./config.yaml:/app/config.yaml doh-server
-```
-
-## API Endpoints
+## API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/dns-query` | GET/POST | DoH endpoint |
+| `/dns-query` | GET/POST | DoH DNS resolution |
 | `/health` | GET | Health check |
-| `/admin/` | GET | Dashboard |
+| `/admin/` | GET | Admin dashboard |
 | `/admin/api/stats` | GET | Server statistics |
-| `/admin/api/health` | GET | Upstream health |
+| `/admin/api/system` | GET | System info (CPU, RAM, disk) |
+| `/admin/api/health` | GET | Upstream DNS health |
 | `/admin/api/logs` | GET | Query logs |
-| `/admin/api/filter` | GET/POST/DELETE | Blocklist management |
-| `/admin/api/filter/toggle` | POST | Toggle filter |
-| `/admin/api/cache/purge` | POST | Purge cache |
+| `/admin/api/filter` | GET/POST/DELETE | Blocklist CRUD |
+| `/admin/api/cache/purge` | POST | Purge DNS cache |
+
+## Testing
+
+```bash
+# Health check
+curl https://doh.yourdomain.com/health
+
+# DNS query (example.com)
+curl -H "accept: application/dns-message" \
+  "https://doh.yourdomain.com/dns-query?dns=qqoBAAABAAAAAAAAB2V4YW1wbGUDY29tAAABAAE"
+```
+
+## Deployment
+
+See [DEPLOY.md](DEPLOY.md) for complete instructions covering:
+
+- Go installation
+- Nginx reverse proxy
+- Let's Encrypt SSL
+- Systemd service
+- Apple profile deployment
 
 ## License
 
-MIT
+[MIT](LICENSE)
