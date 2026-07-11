@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSOverHTTPS</key>
+			<dict>
+				<key>Enabled</key>
+				<true/>
+				<key>ServerAddress</key>
+				<string>https://doh.lllllyccc.qzz.io/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Configures DNS settings for DNS over HTTPS</string>
+			<key>PayloadDisplayName</key>
+			<string>DNS</string>
+			<key>PayloadIdentifier</key>
+			<string>com.doh.dnssettings</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitFallbackData</key>
+			<false/>
+			<key>ServerName</key>
+			<string>doh.lllllyccc.qzz.io</string>
+			<key>SupplementalMatchDomains</key>
+			<array>
+				<string></string>
+			</array>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Installs DNS over HTTPS profile for doh.lllllyccc.qzz.io</string>
+	<key>PayloadDisplayName</key>
+	<string>DNS-over-HTTPS (doh.lllllyccc.qzz.io)</string>
+	<key>PayloadIdentifier</key>
+	<string>com.doh.profile</string>
+	<key>PayloadOrganization</key>
+	<string>doh.lllllyccc.qzz.io</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>F0E1D2C3-B4A5-6789-0123-456789ABCDEF</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
