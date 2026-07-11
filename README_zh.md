@@ -1,7 +1,7 @@
 # DNS-over-HTTPS Server
-
-基于 Go 的轻量级高性能 DNS-over-HTTPS (DoH) 转发服务器。通过 HTTPS 加密 DNS 查询，提升隐私安全，绕过 DNS 层面的限制。
 **注意：本文为readme.md的简体中文版本，由mimo-v2.5-pro翻译，仅供参考。**
+基于 Go 的轻量级高性能 DNS-over-HTTPS (DoH) 转发服务器。通过 HTTPS 加密 DNS 查询，提升隐私安全，绕过 DNS 层面的限制。
+
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
