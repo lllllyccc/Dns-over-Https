@@ -41,7 +41,7 @@ type stats struct {
 type Logger struct {
 	queryLog *QueryLog
 	stats    *stats
-	slog     *slog.Logger
+	logger   *slog.Logger
 }
 
 func New(maxLogEntries int, level string) *Logger {
@@ -72,12 +72,12 @@ func New(maxLogEntries int, level string) *Logger {
 				UpstreamStats: make(map[string]int64),
 			},
 		},
-		slog: logger,
+		logger: logger,
 	}
 }
 
 func (l *Logger) LogQuery(entry QueryEntry) {
-	l.slog.Info("dns_query",
+	l.logger.Info("dns_query",
 		"client_ip", entry.ClientIP,
 		"query_name", entry.QueryName,
 		"query_type", entry.QueryType,
@@ -108,7 +108,7 @@ func (l *Logger) LogQuery(entry QueryEntry) {
 }
 
 func (l *Logger) LogError(msg string, args ...any) {
-	l.slog.Error(msg, args...)
+	l.logger.Error(msg, args...)
 	l.stats.mu.Lock()
 	l.stats.Errors++
 	l.stats.mu.Unlock()
