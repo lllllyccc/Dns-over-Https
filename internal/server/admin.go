@@ -173,22 +173,30 @@ var dashboardTmpl = template.Must(template.New("dashboard").Parse(`<!DOCTYPE htm
 </html>`))
 
 func (h *AdminHandler) serveDashboard(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"FilterCount": h.filter.Count(),
+	filterCount := 0
+	if h.filter != nil {
+		filterCount = h.filter.Count()
 	}
-	dashboardTmpl.Execute(w, data)
+	dashboardTmpl.Execute(w, map[string]interface{}{
+		"FilterCount": filterCount,
+	})
 }
 
 func (h *AdminHandler) serveStats(w http.ResponseWriter, r *http.Request) {
 	stats := h.log.GetStats()
-	cacheTotal, cacheMem := h.cache.Stats()
 
 	result := map[string]interface{}{
 		"total_queries":   stats.TotalQueries,
 		"cache_hits":      stats.CacheHits,
 		"blocked_queries": stats.BlockedQueries,
-		"cache_total":     cacheTotal,
-		"cache_memory":    cacheMem,
+		"cache_total":     0,
+		"cache_memory":    0,
+	}
+
+	if h.cache != nil {
+		total, mem := h.cache.Stats()
+		result["cache_total"] = total
+		result["cache_memory"] = mem
 	}
 
 	json.NewEncoder(w).Encode(result)
@@ -205,6 +213,14 @@ func (h *AdminHandler) serveLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) serveFilterList(w http.ResponseWriter, r *http.Request) {
+	if h.filter == nil {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"enabled": false,
+			"domains": []string{},
+			"count":   0,
+		})
+		return
+	}
 	result := map[string]interface{}{
 		"enabled": h.filter.IsEnabled(),
 		"domains": h.filter.Domains(),
@@ -214,6 +230,10 @@ func (h *AdminHandler) serveFilterList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) serveFilterAdd(w http.ResponseWriter, r *http.Request) {
+	if h.filter == nil {
+		http.Error(w, "filter not enabled", http.StatusServiceUnavailable)
+		return
+	}
 	var req struct {
 		Domain string `json:"domain"`
 	}
@@ -232,11 +252,20 @@ func (h *AdminHandler) serveFilterAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) serveFilterRemove(w http.ResponseWriter, r *http.Request) {
+	if h.filter == nil {
+		http.Error(w, "filter not enabled", http.StatusServiceUnavailable)
+		return
+	}
 	var req struct {
 		Domain string `json:"domain"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	req.Domain = strings.TrimSpace(strings.ToLower(req.Domain))
+	if req.Domain == "" {
+		http.Error(w, "domain required", http.StatusBadRequest)
 		return
 	}
 	h.filter.RemoveDomain(req.Domain)
@@ -245,12 +274,20 @@ func (h *AdminHandler) serveFilterRemove(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *AdminHandler) serveFilterToggle(w http.ResponseWriter, r *http.Request) {
+	if h.filter == nil {
+		http.Error(w, "filter not enabled", http.StatusServiceUnavailable)
+		return
+	}
 	h.filter.SetEnabled(!h.filter.IsEnabled())
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]bool{"enabled": h.filter.IsEnabled()})
 }
 
 func (h *AdminHandler) serveCachePurge(w http.ResponseWriter, r *http.Request) {
+	if h.cache == nil {
+		http.Error(w, "cache not enabled", http.StatusServiceUnavailable)
+		return
+	}
 	h.cache.Purge()
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/base64"
 	"io"
 	"net/http"
@@ -47,6 +46,7 @@ func (h *DoHHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "invalid content type", http.StatusUnsupportedMediaType)
 			return
 		}
+		defer r.Body.Close()
 		rawMsg, err = io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "failed to read body", http.StatusInternalServerError)
@@ -111,5 +111,3 @@ func (h *DoHHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache, no-store")
 	w.Write(respData)
 }
-
-var _ = context.Background
