@@ -1,6 +1,6 @@
 # DNS-over-HTTPS Server
 
-A lightweight, high-performance DNS-over-HTTPS (DoH) forwarder built with Go. Proxy your DNS queries through HTTPS to enhance privacy and bypass DNS-based restrictions.
+A lightweight, high-performance DNS-over-HTTPS (DoH) forwarder built with Go. Encrypt your DNS queries via HTTPS to enhance privacy and bypass DNS-based restrictions.
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -29,15 +29,12 @@ Traditional DNS queries are sent in plaintext, making them vulnerable to eavesdr
 ## Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/lllllyccc/Dns-over-Https.git
 cd Dns-over-Https
 
-# Configure
 cp config.example.yaml config.yaml
 # Edit config.yaml with your settings
 
-# Build & Run
 go build -o doh-server ./cmd/doh-server
 ./doh-server config.yaml
 ```
@@ -86,8 +83,6 @@ See [DEPLOY.md](DEPLOY.md) for full deployment guide.
 
 ## Admin Dashboard
 
-The built-in web dashboard provides:
-
 - **Real-time stats**: query count, cache hit rate, blocked queries
 - **Server status**: CPU, memory, disk usage, uptime, load average
 - **Upstream health**: live monitoring of DNS resolver status
@@ -95,20 +90,11 @@ The built-in web dashboard provides:
 - **Filter management**: add/remove domains, toggle blocking on/off
 - **Cache control**: view entries, purge cache
 
-```
-https://doh.yourdomain.com/admin/
-```
-
 ## Apple Devices
-
-One-click DNS configuration for iOS, iPadOS, and macOS:
 
 1. Open `https://doh.yourdomain.com/doh.mobileconfig` in Safari
 2. Allow the profile download
-3. Go to Settings → General → VPN & Device Management
-4. Install the profile
-
-All DNS queries will automatically route through your DoH server.
+3. Settings → General → VPN & Device Management → Install
 
 ## API
 
@@ -127,23 +113,11 @@ All DNS queries will automatically route through your DoH server.
 ## Testing
 
 ```bash
-# Health check
 curl https://doh.yourdomain.com/health
 
-# DNS query (example.com)
 curl -H "accept: application/dns-message" \
   "https://doh.yourdomain.com/dns-query?dns=qqoBAAABAAAAAAAAB2V4YW1wbGUDY29tAAABAAE"
 ```
-
-## Deployment
-
-See [DEPLOY.md](DEPLOY.md) for complete instructions covering:
-
-- Go installation
-- Nginx reverse proxy
-- Let's Encrypt SSL
-- Systemd service
-- Apple profile deployment
 
 ## License
 

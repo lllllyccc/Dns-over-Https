@@ -1,13 +1,13 @@
-# Deployment Guide
+# 部署指南
 
-## Prerequisites
+## 前置条件
 
-- Ubuntu 22.04+ server (Oracle Cloud ARM/x86)
-- Domain with A record pointing to server IP
-- Nginx installed
-- Certbot installed (for Let's Encrypt)
+- Ubuntu 22.04+ 服务器（Oracle Cloud ARM/x86 均可）
+- 域名已配置 A 记录指向服务器 IP
+- Nginx 已安装
+- Certbot 已安装（用于 Let's Encrypt 证书）
 
-## 1. Install Go
+## 1. 安装 Go
 
 ```bash
 wget https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
@@ -16,7 +16,7 @@ echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-## 2. Clone & Build
+## 2. 克隆并构建
 
 ```bash
 sudo mkdir -p /opt/doh-server
@@ -26,14 +26,14 @@ git clone https://github.com/lllllyccc/Dns-over-Https.git .
 go build -o doh-server ./cmd/doh-server
 ```
 
-## 3. Configure
+## 3. 配置
 
-Edit `config.yaml`:
+编辑 `config.yaml`：
 
 ```yaml
 listen: "127.0.0.1:8053"
 admin_listen: "127.0.0.1:8054"
-domain: "doh.yourdomain.com"
+domain: "doh.你的域名.com"
 
 upstreams:
   - name: "google"
@@ -56,7 +56,7 @@ filter:
 
 admin:
   username: "admin"
-  password: "your_secure_password"
+  password: "你的安全密码"
 
 logging:
   level: "info"
@@ -64,7 +64,7 @@ logging:
   max_log_entries: 10000
 ```
 
-## 4. Systemd Service
+## 4. Systemd 服务
 
 ```bash
 sudo tee /etc/systemd/system/doh-server.service << 'EOF'
@@ -89,24 +89,24 @@ sudo systemctl enable doh-server
 sudo systemctl start doh-server
 ```
 
-## 5. SSL Certificate
+## 5. SSL 证书
 
 ```bash
-# Ensure DNS A record is set: doh.yourdomain.com → server IP
+# 确保 DNS A 记录已设置：doh.你的域名.com → 服务器 IP
 sudo mkdir -p /var/www/certbot
-sudo certbot certonly --webroot -w /var/www/certbot -d doh.yourdomain.com
+sudo certbot certonly --webroot -w /var/www/certbot -d doh.你的域名.com
 ```
 
-## 6. Nginx Reverse Proxy
+## 6. Nginx 反向代理
 
 ```bash
 sudo tee /etc/nginx/sites-available/doh << 'EOF'
 server {
     listen 443 ssl http2;
-    server_name doh.yourdomain.com;
+    server_name doh.你的域名.com;
 
-    ssl_certificate /etc/letsencrypt/live/doh.yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/doh.yourdomain.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/doh.你的域名.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/doh.你的域名.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
 
     location /dns-query {
@@ -152,7 +152,7 @@ server {
 
 server {
     listen 80;
-    server_name doh.yourdomain.com;
+    server_name doh.你的域名.com;
     return 301 https://$host$request_uri;
 }
 EOF
@@ -162,28 +162,28 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-## 7. Apple Profile
+## 7. Apple 描述文件
 
 ```bash
 sudo mkdir -p /var/www/doh
 sudo cp doh.mobileconfig /var/www/doh/
 ```
 
-## Operations
+## 运维
 
-### View Logs
+### 查看日志
 
 ```bash
 sudo journalctl -u doh-server -f
 ```
 
-### Restart Service
+### 重启服务
 
 ```bash
 sudo systemctl restart doh-server
 ```
 
-### Update Code
+### 更新代码
 
 ```bash
 cd /opt/doh-server
@@ -192,28 +192,28 @@ go build -o doh-server ./cmd/doh-server
 sudo systemctl restart doh-server
 ```
 
-### Edit Blocklist
+### 编辑过滤列表
 
 ```bash
 vim /opt/doh-server/blocklist.txt
 sudo systemctl restart doh-server
 ```
 
-Or manage via admin panel web UI.
+或通过管理面板在线增删。
 
-## Troubleshooting
+## 故障排查
 
-| Problem | Solution |
-|---------|----------|
-| 502 Bad Gateway | Check service: `systemctl status doh-server` |
-| Certificate expired | `sudo certbot renew` |
-| Filter not working | Verify blocklist format: `0.0.0.0 domain.com` |
-| Admin 404 | Check Nginx config has `/admin` location |
-| Cache not persisting | Check `data/` directory permissions |
+| 问题 | 解决方案 |
+|------|---------|
+| 502 Bad Gateway | 检查服务状态：`systemctl status doh-server` |
+| 证书过期 | `sudo certbot renew` |
+| 过滤不生效 | 检查 blocklist.txt 格式：`0.0.0.0 domain.com` |
+| 管理面板 404 | 确认 Nginx 配置包含 `/admin` location |
+| 缓存未持久化 | 检查 `data/` 目录权限 |
 
-## Security
+## 安全建议
 
-- Admin panel only listens on `127.0.0.1` by default
-- Use strong password for admin credentials
-- Consider IP whitelisting for admin panel
-- Monitor query logs for suspicious activity
+- 管理面板默认仅监听 `127.0.0.1`
+- 使用强密码作为管理员凭据
+- 建议为管理面板配置 IP 白名单
+- 监控查询日志发现异常流量
