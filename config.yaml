@@ -29,6 +29,10 @@ tls:
   email: ""
   cache_dir: "./certs"
 
+admin:
+  username: "admin"
+  password: "doh2024"
+
 logging:
   level: "info"
   query_log: true

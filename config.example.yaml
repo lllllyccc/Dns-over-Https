@@ -29,6 +29,10 @@ tls:
   email: "admin@example.com"
   cache_dir: "./certs"
 
+admin:
+  username: "admin"
+  password: "changeme"
+
 logging:
   level: "info"
   query_log: true

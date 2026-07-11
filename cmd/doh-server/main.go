@@ -65,7 +65,7 @@ func main() {
 
 	dohHandler := server.NewDoHHandler(fwd, log)
 
-	adminHandler := server.NewAdminHandler(fwd, filterInst, log, cacheInst)
+	adminHandler := server.NewAdminHandler(fwd, filterInst, log, cacheInst, cfg.Admin.Username, cfg.Admin.Password)
 
 	mux := http.NewServeMux()
 	mux.Handle("/dns-query", dohHandler)

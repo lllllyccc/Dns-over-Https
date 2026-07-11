@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"html/template"
 	"net/http"
@@ -12,22 +13,45 @@ import (
 )
 
 type AdminHandler struct {
-	fwd    *resolver.Forwarder
-	filter *filter.Filter
-	log    *logger.Logger
-	cache  *resolver.Cache
+	fwd      *resolver.Forwarder
+	filter   *filter.Filter
+	log      *logger.Logger
+	cache    *resolver.Cache
+	username string
+	password string
 }
 
-func NewAdminHandler(fwd *resolver.Forwarder, flt *filter.Filter, log *logger.Logger, cache *resolver.Cache) *AdminHandler {
+func NewAdminHandler(fwd *resolver.Forwarder, flt *filter.Filter, log *logger.Logger, cache *resolver.Cache, username, password string) *AdminHandler {
 	return &AdminHandler{
-		fwd:    fwd,
-		filter: flt,
-		log:    log,
-		cache:  cache,
+		fwd:      fwd,
+		filter:   flt,
+		log:      log,
+		cache:    cache,
+		username: username,
+		password: password,
 	}
 }
 
+func (h *AdminHandler) checkAuth(r *http.Request) bool {
+	if h.username == "" && h.password == "" {
+		return true
+	}
+	user, pass, ok := r.BasicAuth()
+	if !ok {
+		return false
+	}
+	userMatch := subtle.ConstantTimeCompare([]byte(user), []byte(h.username)) == 1
+	passMatch := subtle.ConstantTimeCompare([]byte(pass), []byte(h.password)) == 1
+	return userMatch && passMatch
+}
+
 func (h *AdminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !h.checkAuth(r) {
+		w.Header().Set("WWW-Authenticate", `Basic realm="DoH Admin"`)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	path := r.URL.Path
 
 	switch {

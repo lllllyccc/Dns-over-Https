@@ -14,8 +14,14 @@ type Config struct {
 	Upstreams   []Upstream    `yaml:"upstreams"`
 	Cache       CacheConfig   `yaml:"cache"`
 	Filter      FilterConfig  `yaml:"filter"`
+	Admin       AdminConfig   `yaml:"admin"`
 	TLS         TLSConfig     `yaml:"tls"`
 	Logging     LoggingConfig `yaml:"logging"`
+}
+
+type AdminConfig struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type Upstream struct {
