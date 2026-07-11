@@ -136,8 +136,8 @@ func getDiskUsage(path string) (total, used, usage string) {
 	if err := syscallStatfsFn(path, &stat); err != nil {
 		return "-", "-", "-"
 	}
-	totalBytes := int64(stat.blocks) * int64(stat.bsize)
-	freeBytes := int64(stat.bavail) * int64(stat.bsize)
+	totalBytes := int64(stat.Blocks) * int64(stat.Bsize)
+	freeBytes := int64(stat.Bavail) * int64(stat.Bsize)
 	usedBytes := totalBytes - freeBytes
 	usagePct := 0.0
 	if totalBytes > 0 {
