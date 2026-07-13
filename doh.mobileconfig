@@ -14,7 +14,7 @@
 			<key>PayloadType</key>
 			<string>com.apple.dnsSettings.managed</string>
 			<key>PayloadUUID</key>
-			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<string>B2C3D4E5-F6A7-8901-BCDE-F12345678901</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 			<key>DNSSettings</key>
@@ -22,7 +22,7 @@
 				<key>DNSProtocol</key>
 				<string>HTTPS</string>
 				<key>ServerURL</key>
-				<string>https://doh.lllllyccc.qzz.io/dns-query</string>
+				<string>https://129.225.151.240:2053/dns-query</string>
 				<key>ServerName</key>
 				<string>doh.lllllyccc.qzz.io</string>
 				<key>SupplementalMatchDomains</key>
@@ -45,8 +45,8 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>F0E1D2C3-B4A5-6789-0123-456789ABCDEF</string>
+	<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567892</string>
 	<key>PayloadVersion</key>
-	<integer>1</integer>
+	<integer>2</integer>
 </dict>
 </plist>
