@@ -45,6 +45,8 @@ type FilterConfig struct {
 type TLSConfig struct {
 	Email    string `yaml:"email"`
 	CacheDir string `yaml:"cache_dir"`
+	CertFile string `yaml:"cert_file"`
+	KeyFile  string `yaml:"key_file"`
 }
 
 type LoggingConfig struct {

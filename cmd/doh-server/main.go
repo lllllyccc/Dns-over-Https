@@ -94,9 +94,16 @@ func main() {
 	defer stop()
 
 	go func() {
-		slog.Info("DoH server starting", "listen", cfg.Listen)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Error("DoH server error", "error", err)
+		var listenErr error
+		if cfg.TLS.CertFile != "" && cfg.TLS.KeyFile != "" {
+			slog.Info("DoH server starting (TLS)", "listen", cfg.Listen)
+			listenErr = srv.ListenAndServeTLS(cfg.TLS.CertFile, cfg.TLS.KeyFile)
+		} else {
+			slog.Info("DoH server starting", "listen", cfg.Listen)
+			listenErr = srv.ListenAndServe()
+		}
+		if listenErr != nil && listenErr != http.ErrServerClosed {
+			slog.Error("DoH server error", "error", listenErr)
 		}
 	}()
 
