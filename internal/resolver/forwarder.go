@@ -28,6 +28,7 @@ type Forwarder struct {
 	upstreams []*Upstream
 	cache     *Cache
 	filter    *filter.Filter
+	transport *http.Transport
 	mu        sync.RWMutex
 }
 
@@ -35,6 +36,13 @@ func NewForwarder(upstreams []UpstreamConfig, cache *Cache, flt *filter.Filter) 
 	f := &Forwarder{
 		cache:  cache,
 		filter: flt,
+		transport: &http.Transport{
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 10,
+			IdleConnTimeout:     90 * time.Second,
+			TLSHandshakeTimeout: 5 * time.Second,
+			DisableKeepAlives:   false,
+		},
 	}
 	for _, u := range upstreams {
 		f.upstreams = append(f.upstreams, &Upstream{
@@ -122,7 +130,7 @@ func (f *Forwarder) queryDoH(ctx context.Context, u *Upstream, q *dns.Msg) (*dns
 	req.Header.Set("Content-Type", "application/dns-message")
 	req.Header.Set("Accept", "application/dns-message")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := (&http.Client{Transport: f.transport}).Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("doh request: %w", err)
 	}
